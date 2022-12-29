@@ -1,5 +1,6 @@
 use macroquad::prelude::*;
 
+#[derive(Clone, Copy)]
 pub struct Bullet {
     pub x: f32,
     pub y: f32,
@@ -20,7 +21,11 @@ impl Bullet {
         }
     }
 
-    pub fn draw(&mut self, texture: &Texture2D) {
+    pub fn hit(&mut self) {
+        self.is_alive = false;
+    }
+
+    pub fn draw(&mut self, _texture: &Texture2D) {
         draw_rectangle(self.x, self.y, self.size, self.size, self.color);
     }
 }

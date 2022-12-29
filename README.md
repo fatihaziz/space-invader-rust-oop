@@ -1,6 +1,7 @@
 <p align="center">
   <a href="" rel="noopener">
- <img width=200px height=200px src="https://i.imgur.com/6wj0hh6.jpg" alt="Project logo"></a>
+ <img width=200px height=200px src="./assets/icon.png" alt="Project logo" style="border-radius:50%" />
+ </a>
 </p>
 
 <h3 align="center">Space Invader Rust</h3>
@@ -16,94 +17,64 @@
 
 ---
 
-<p align="center"> Few lines describing your project.
+<p align="center"> Simple space invader game written in Rust.
     <br>
 </p>
 
-## 📝 Table of Contents
-
-- [About](#about)
-- [Getting Started](#getting_started)
-- [Deployment](#deployment)
-- [Usage](#usage)
-- [Built Using](#built_using)
-- [TODO](../TODO.md)
-- [Contributing](../CONTRIBUTING.md)
-- [Authors](#authors)
-- [Acknowledgments](#acknowledgement)
-
 ## 🧐 About <a name = "about"></a>
 
-Write about 1-2 paragraphs describing the purpose of your project.
+This is a simple space invader game written in Rust. I am using the OOP approach to write this game. I use macroquad for the game engine.
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
+Here step by step how to run this game.
 
 ### Prerequisites
 
-What things you need to install the software and how to install them.
-
-```
-Give examples
-```
+You must have `cargo` installed on your machine. You can install it from [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
 
 ### Installing
 
 A step by step series of examples that tell you how to get a development env running.
 
-Say what the step will be
+1. Clone this repo
 
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
+```shell
+git clone git@github.com:fatihaziz/space-invader-rust-oop.git
 ```
 
-End with an example of getting some data out of the system or using it for a little demo.
+2. Move to directory
 
-## 🔧 Running the tests <a name = "tests"></a>
-
-Explain how to run the automated tests for this system.
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
+```shell
+cd space-invader-rust-oop
 ```
 
-### And coding style tests
+3. Run the game
 
-Explain what these tests test and why
-
-```
-Give an example
+```shell
+cargo run
 ```
 
-## 🎈 Usage <a name="usage"></a>
+## 📷 Screenshots<a name = "screenshots"></a>
 
-Add notes about how to use the system.
+### Game Over
 
-## 🚀 Deployment <a name = "deployment"></a>
+<img src="./screenshoots/game_over.png" alt="screenshot" />
 
-Add additional notes about how to deploy this on a live system.
+### Game Play
+
+<img src="./screenshoots/gameplay.png" alt="screenshot" />
+
+</br>
 
 ## ⛏️ Built Using <a name = "built_using"></a>
 
-- [MongoDB](https://www.mongodb.com/) - Database
-- [Express](https://expressjs.com/) - Server Framework
-- [VueJs](https://vuejs.org/) - Web Framework
-- [NodeJs](https://nodejs.org/en/) - Server Environment
+- [Rust](https://www.rust-lang.org/) - Language
+- [Macroquad](https://github.com/not-fl3/macroquad) - Game Engine
 
 ## ✍️ Authors <a name = "authors"></a>
 
-- [@kylelobo](https://github.com/kylelobo) - Idea & Initial work
+- [@fatihaziz](https://github.com/fatihaziz) - Dev
 
 See also the list of [contributors](https://github.com/kylelobo/The-Documentation-Compendium/contributors) who participated in this project.
 
@@ -112,3 +83,4 @@ See also the list of [contributors](https://github.com/kylelobo/The-Documentatio
 - Hat tip to anyone whose code was used
 - Inspiration
 - References
+  - [@titan3755](https://github.com/titan3755/space-invaders)

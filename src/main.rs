@@ -1,7 +1,7 @@
 use logic::{game_logic, new_game, GameState};
 // also add 'tokio-js-set-interval = "<latest-version>"' to your Cargo.toml!
 use macroquad::prelude::*;
-use render::game_render;
+use render::{game_render, render_game_over_screen, render_start_screen};
 
 mod entities;
 mod logic;
@@ -39,50 +39,29 @@ async fn main() {
         limit_fps(500.0);
 
         if is_key_pressed(KeyCode::Space) {
-            game.state = GameState::PLAYING;
+            if game.state == GameState::CREATED {
+                game.state = GameState::PLAYING;
+            } else if game.state == GameState::GAMEOVER {
+                game = new_game().await;
+                game.state = GameState::PLAYING;
+            }
         }
         if is_key_pressed(KeyCode::Escape) {
-            game.state = GameState::EXIT;
+            if game.state == GameState::PLAYING {
+                game.state = GameState::GAMEOVER;
+            } else if game.state == GameState::GAMEOVER {
+                game.state = GameState::EXIT;
+            }
         }
         match game.state {
-            GameState::CREATED => {
-                draw_text(
-                    "Press Space to Start",
-                    (WINDOW_WIDTH / 2.0) - 200.0,
-                    250.0,
-                    50.0,
-                    WHITE,
-                );
-                draw_text(
-                    "Press Esc to Exit",
-                    (WINDOW_WIDTH / 2.0) - 100.0,
-                    300.0,
-                    24.0,
-                    WHITE,
-                );
-            }
+            GameState::CREATED => render_start_screen(),
 
             GameState::PLAYING => {
                 game_logic(&mut game);
                 game_render(&mut game);
             }
 
-            GameState::GAMEOVER => {
-                draw_text(
-                    "Game Over",
-                    (WINDOW_WIDTH / 2.0) - 100.0,
-                    250.0,
-                    50.0,
-                    WHITE,
-                );
-                draw_text(
-                    "Press Esc to Exit",
-                    (WINDOW_WIDTH / 2.0) - 100.0,
-                    300.0,
-                    24.0,
-                    WHITE,
-                );
-            }
+            GameState::GAMEOVER => render_game_over_screen(&mut game),
 
             GameState::EXIT => {
                 clear_background(BLACK);
@@ -94,7 +73,7 @@ async fn main() {
                     WHITE,
                 );
 
-                if (time_exit.is_none()) {
+                if time_exit.is_none() {
                     time_exit = Some(macroquad::time::get_time() as f32);
                 } else {
                     if (macroquad::time::get_time() as f32 - time_exit.unwrap()) > 1.0 {
@@ -102,7 +81,6 @@ async fn main() {
                     }
                 }
             }
-            _ => {}
         }
 
         // for debugging
