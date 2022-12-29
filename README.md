@@ -55,6 +55,12 @@ cd space-invader-rust-oop
 cargo run
 ```
 
+# 🎯 Next Goals
+
+- [ ] Add more waves
+- [ ] Add more movement dynamic for the enemies
+- [ ] Make the last boss like Tohou game, it can move and shoot at the same time
+
 ## 📷 Screenshots<a name = "screenshots"></a>
 
 ### Game Over
