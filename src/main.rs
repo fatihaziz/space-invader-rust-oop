@@ -1,130 +1,116 @@
+use logic::{game_logic, new_game, GameState};
 // also add 'tokio-js-set-interval = "<latest-version>"' to your Cargo.toml!
+use macroquad::prelude::*;
+use render::game_render;
 
-use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers};
-use std::sync::{Arc, Mutex};
-use std::{thread, time::Duration};
+mod entities;
+mod logic;
+mod render;
 
-#[derive(Debug)]
-pub enum GameState {
-    CREATED,
-    PLAYING,
-    PAUSED,
-}
+pub const WINDOW_WIDTH: f32 = 800.0;
+pub const WINDOW_HEIGHT: f32 = 600.0;
 
-#[derive(Clone, Copy)]
-pub struct Ship {
-    pub state: i32,
-    pub size: i32,
-    pub x1: i32,
-    pub x2: i32,
-    pub y1: i32,
-    pub y2: i32,
-}
-pub struct GameObject {
-    pub state: GameState,
-    pub ship_vec: Arc<Mutex<Vec<Ship>>>,
-}
-
-// create rust to detect keypress
-
-fn keypress() -> String {
-    loop {
-        if let Event::Key(KeyEvent {
-            code: KeyCode::Char(pressed),
-            modifiers: KeyModifiers::NONE,
-            state: KeyEventState::NONE,
-            kind: KeyEventKind::Press,
-        }) = read().unwrap()
-        {
-            return pressed.to_string();
-        }
+fn windows_conf() -> Conf {
+    Conf {
+        window_title: "Space Invader".to_owned(),
+        window_width: WINDOW_WIDTH as i32,
+        window_height: WINDOW_HEIGHT as i32,
+        fullscreen: false,
+        window_resizable: false,
+        ..Default::default()
     }
 }
 
-#[tokio::main]
+fn limit_fps(max_fps: f64) {
+    let frame_time = 1.0 / max_fps;
+    let start_time = macroquad::time::get_time();
+    let end_time = start_time + frame_time;
+    while macroquad::time::get_time() < end_time {
+        // do nothing
+    }
+}
+
+#[macroquad::main(windows_conf)]
 async fn main() {
-    let game_object = Arc::new(Mutex::new(GameObject {
-        state: GameState::CREATED,
-        ship_vec: Arc::new(Mutex::new(Vec::new())),
-    }));
-    let ship_vec = game_object.lock().unwrap().ship_vec.clone();
+    let mut game = new_game().await;
 
-    let mut handles = vec![];
+    let mut time_exit: Option<f32> = None;
+    loop {
+        limit_fps(500.0);
 
-    let game_object_arc = game_object.clone();
-    handles.push(thread::spawn(move || loop {
-        if ship_vec.lock().unwrap().last().is_none() {
-            // init ship vec
-            ship_vec.lock().unwrap().push(Ship {
-                state: 1,
-                size: 24,
-                x1: 0,
-                x2: 24,
-                y1: 0,
-                y2: 24,
-            });
-            continue;
+        if is_key_pressed(KeyCode::Space) {
+            game.state = GameState::PLAYING;
         }
-        // get last ship
-        let mut ship = *ship_vec.lock().unwrap().last().unwrap();
-        match keypress().as_str() {
-            "w" => {
-                ship.y1 += 1;
-                ship.y2 += 1;
+        if is_key_pressed(KeyCode::Escape) {
+            game.state = GameState::EXIT;
+        }
+        match game.state {
+            GameState::CREATED => {
+                draw_text(
+                    "Press Space to Start",
+                    (WINDOW_WIDTH / 2.0) - 200.0,
+                    250.0,
+                    50.0,
+                    WHITE,
+                );
+                draw_text(
+                    "Press Esc to Exit",
+                    (WINDOW_WIDTH / 2.0) - 100.0,
+                    300.0,
+                    24.0,
+                    WHITE,
+                );
             }
-            "a" => {
-                ship.x1 -= 1;
-                ship.x2 -= 1;
+
+            GameState::PLAYING => {
+                game_logic(&mut game);
+                game_render(&mut game);
             }
-            "s" => {
-                ship.y1 -= 1;
-                ship.y2 -= 1;
+
+            GameState::GAMEOVER => {
+                draw_text(
+                    "Game Over",
+                    (WINDOW_WIDTH / 2.0) - 100.0,
+                    250.0,
+                    50.0,
+                    WHITE,
+                );
+                draw_text(
+                    "Press Esc to Exit",
+                    (WINDOW_WIDTH / 2.0) - 100.0,
+                    300.0,
+                    24.0,
+                    WHITE,
+                );
             }
-            "d" => {
-                ship.x1 += 1;
-                ship.x2 += 1;
+
+            GameState::EXIT => {
+                clear_background(BLACK);
+                draw_text(
+                    "Thanks for Playing!",
+                    (WINDOW_WIDTH / 2.0) - 200.0,
+                    250.0,
+                    50.0,
+                    WHITE,
+                );
+
+                if (time_exit.is_none()) {
+                    time_exit = Some(macroquad::time::get_time() as f32);
+                } else {
+                    if (macroquad::time::get_time() as f32 - time_exit.unwrap()) > 1.0 {
+                        break;
+                    }
+                }
             }
-            _ => {
-                println!("other key pressed!");
-            }
+            _ => {}
         }
 
-        // print ship position
-        ship_vec.lock().unwrap().push(Ship {
-            state: ship.state,
-            size: ship.size,
-            x1: ship.x1,
-            x2: ship.x2,
-            y1: ship.y1,
-            y2: ship.y2,
-        });
-        ship_vec.lock().unwrap().remove(0);
-        game_object_arc.lock().unwrap().state = GameState::PLAYING;
-
-        println!(
-            "print pos realtime: x1: {}, x2: {}, y1: {}, y2: {}",
-            ship.x1, ship.x2, ship.y1, ship.y2
-        );
-    }));
-
-    let ship_vec = game_object.lock().unwrap().ship_vec.clone();
-    handles.push(thread::spawn(move || loop {
-        if ship_vec.lock().unwrap().last().is_none() {
-            continue;
+        // for debugging
+        {
+            // show fps on top left corner, size 12
+            draw_text(&format!("FPS: {}", get_fps()), 10.0, 10.0, 12.0, WHITE);
         }
-        let ship = *ship_vec.lock().unwrap().last().unwrap();
-        println!(
-            "tick print pos delay 1s: x1: {}, x2: {}, y1: {}, y2: {}, game state: {:?}",
-            ship.x1,
-            ship.x2,
-            ship.y1,
-            ship.y2,
-            game_object.lock().unwrap().state
-        );
-        thread::sleep(Duration::from_millis(1000));
-    }));
 
-    for handle in handles {
-        handle.join().unwrap();
+        next_frame().await;
     }
 }
