@@ -41,8 +41,10 @@ impl Bullet {
         }
     }
 
-    pub fn hit(&mut self) {
-        self.is_alive = false;
+    pub fn hit(&mut self, enemy: Enemy) {
+        if enemy.health >= self.damage {
+            self.is_alive = false;
+        }
     }
 
     pub fn is_hit(&mut self, enemy: Enemy) -> bool {

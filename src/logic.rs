@@ -1,12 +1,14 @@
-use macroquad::prelude::*;
-use macroquad::texture::Texture2D;
+use macroquad::prelude::{is_key_down, is_key_pressed};
+use macroquad::{color::*, prelude::KeyCode};
 
 use crate::{
     entities::{
+        buff::Buff,
         bullet::{Bullet, BulletBy},
         enemy::Enemy,
         ship::Ship,
     },
+    render::GameTexture,
     WINDOW_HEIGHT, WINDOW_WIDTH,
 };
 
@@ -17,31 +19,17 @@ pub enum GameState {
     GAMEOVER,
     EXIT,
 }
-pub struct GameTexture {
-    pub bg: Texture2D,
-    pub ship: Texture2D,
-    pub enemy: Texture2D,
-    pub bullet: Texture2D,
-}
-
-pub struct Buff {
-    pub ship_speed: f32,
-    pub bullet_damage: f32,
-    pub bullet_multiplier: f32,
-    pub bullet_size: f32,
-    pub score_multiplier: f32,
-}
 
 pub struct GameObject {
     pub state: GameState,
     pub ship: Option<Ship>,
     pub enemies_vec: Option<Vec<Enemy>>,
     pub bullets_vec: Option<Vec<Bullet>>,
+    pub buff_vec: Option<Vec<Buff>>,
     pub waves: f32,
     pub score: f32,
     pub high_score: f32,
     pub texture: GameTexture,
-    pub buff: Option<Buff>,
 }
 
 pub async fn new_game() -> GameObject {
@@ -53,24 +41,8 @@ pub async fn new_game() -> GameObject {
         waves: 1.0,
         score: 0.0,
         high_score: 0.0,
-        texture: {
-            GameTexture {
-                bg: (Texture2D::from_file_with_format(include_bytes!("../assets/bg.png"), None)),
-                ship: (Texture2D::from_file_with_format(
-                    include_bytes!("../assets/ship.png"),
-                    None,
-                )),
-                enemy: (Texture2D::from_file_with_format(
-                    include_bytes!("../assets/enemy.png"),
-                    None,
-                )),
-                bullet: (Texture2D::from_file_with_format(
-                    include_bytes!("../assets/bullet.png"),
-                    None,
-                )),
-            }
-        },
-        buff: None,
+        texture: GameTexture::load(),
+        buff_vec: None,
     };
 
     // initialize player's ship
@@ -88,6 +60,10 @@ pub async fn new_game() -> GameObject {
 
 pub fn game_logic(game: &mut GameObject) {
     let ship = &mut game.ship.unwrap();
+
+    // spawn random buff around
+    {}
+
     // user input
     {
         if is_key_down(KeyCode::Left) || is_key_down(KeyCode::A) {
@@ -121,7 +97,8 @@ pub fn game_logic(game: &mut GameObject) {
     // fire a bullet when press space
     {
         if is_key_pressed(KeyCode::Space) {
-            let mut bullet = Bullet::new(
+            // if is_key_down(KeyCode::Space) {
+            let bullet = Bullet::new(
                 (ship.x + ship.size / 2.0) - 5.0,
                 ship.y,
                 WHITE,
@@ -130,11 +107,11 @@ pub fn game_logic(game: &mut GameObject) {
                 1.0,
                 BulletBy::PLAYER,
             );
-            if let Some(buff) = &mut game.buff {
-                bullet.damage = buff.bullet_damage;
-            }
+
             if let Some(bullet_vec) = &mut game.bullets_vec {
-                bullet_vec.push(bullet);
+                if bullet_vec.len() < 10 {
+                    bullet_vec.push(bullet);
+                }
             } else {
                 game.bullets_vec = Some(vec![bullet]);
             }
@@ -174,7 +151,7 @@ pub fn game_logic(game: &mut GameObject) {
                 if let Some(bullet_vec) = &mut game.bullets_vec {
                     for bullet in bullet_vec {
                         if bullet.is_hit(*enemy) {
-                            bullet.hit();
+                            bullet.hit(*enemy);
                             enemy.kill(*bullet);
                             if enemy.is_alive == false {
                                 game.score += enemy.score;
@@ -187,19 +164,15 @@ pub fn game_logic(game: &mut GameObject) {
             }
         }
 
-        let mut score_multiplier = 1.0;
-        if let Some(buff) = &mut game.buff {
-            score_multiplier =
-                score_multiplier + (buff.score_multiplier * (game.waves - 1.0) as f32);
-        }
+        let score_multiplier = 1.0;
 
         if game.waves < 2.0 && game.waves <= max_waves
         // generate 20 enemies per rows, 5 rows
         {
             let enemies_vec = &mut game.enemies_vec;
             if enemies_vec.is_none() {
-                let enemy_per_row = 1;
-                let enemy_rows = 1;
+                let enemy_per_row = 20;
+                let enemy_rows = 5;
 
                 let mut enemy = Enemy::new(0.0, 0.0, WHITE, 50.0, 0.25, 1.0, 1.0);
                 let mut enemies_vec = Vec::new();
@@ -219,8 +192,8 @@ pub fn game_logic(game: &mut GameObject) {
         {
             let enemies_vec = &mut game.enemies_vec;
             if enemies_vec.is_none() {
-                let enemy_per_row = 1;
-                let enemy_rows = 1;
+                let enemy_per_row = 25;
+                let enemy_rows = 7;
 
                 let mut enemy = Enemy::new(0.0, 0.0, WHITE, 40.0, 0.5, 2.0, 1.0);
 

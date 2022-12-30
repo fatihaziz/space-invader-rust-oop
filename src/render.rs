@@ -2,6 +2,26 @@ use macroquad::prelude::*;
 
 use crate::{logic::GameObject, WINDOW_WIDTH};
 
+pub struct GameTexture {
+    pub bg: Texture2D,
+    pub ship: Texture2D,
+    pub enemy: Texture2D,
+    pub bullet: Texture2D,
+}
+impl GameTexture {
+    pub fn load() -> GameTexture {
+        GameTexture {
+            bg: (Texture2D::from_file_with_format(include_bytes!("../assets/bg.png"), None)),
+            ship: (Texture2D::from_file_with_format(include_bytes!("../assets/ship.png"), None)),
+            enemy: (Texture2D::from_file_with_format(include_bytes!("../assets/enemy.png"), None)),
+            bullet: (Texture2D::from_file_with_format(
+                include_bytes!("../assets/bullet.png"),
+                None,
+            )),
+        }
+    }
+}
+
 pub fn bg_render(txt2d: &Texture2D) {
     draw_texture(*txt2d, 0.0, 0.0, WHITE)
 }
