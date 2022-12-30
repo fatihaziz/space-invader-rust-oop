@@ -6,5 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crossterm = "0.25.0"
-tokio = { version = "*", features = ["full"] }
+macroquad = { version = "0.3.25" }
+
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1.12"
