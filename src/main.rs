@@ -1,7 +1,6 @@
 use logic::{game_logic, new_game, GameState};
-// also add 'tokio-js-set-interval = "<latest-version>"' to your Cargo.toml!
 use macroquad::prelude::*;
-use render::{game_render, render_game_over_screen, render_start_screen};
+use render::{game_over_screen_render, game_render, start_screen_render};
 
 mod entities;
 mod logic;
@@ -49,19 +48,19 @@ async fn main() {
         if is_key_pressed(KeyCode::Escape) {
             if game.state == GameState::PLAYING {
                 game.state = GameState::GAMEOVER;
-            } else if game.state == GameState::GAMEOVER {
+            } else {
                 game.state = GameState::EXIT;
             }
         }
         match game.state {
-            GameState::CREATED => render_start_screen(),
+            GameState::CREATED => start_screen_render(),
 
             GameState::PLAYING => {
                 game_logic(&mut game);
                 game_render(&mut game);
             }
 
-            GameState::GAMEOVER => render_game_over_screen(&mut game),
+            GameState::GAMEOVER => game_over_screen_render(&mut game),
 
             GameState::EXIT => {
                 clear_background(BLACK);

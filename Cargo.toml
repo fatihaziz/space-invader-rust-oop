@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 macroquad = { version = "0.3.25" }
-tokio = { version = "*", features = ["full"] }
 
 
 [target.'cfg(windows)'.build-dependencies]

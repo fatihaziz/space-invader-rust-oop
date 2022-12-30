@@ -1,5 +1,7 @@
 use macroquad::prelude::*;
 
+use super::bullet::Bullet;
+
 #[derive(Clone, Copy)]
 pub struct Enemy {
     pub x: f32,
@@ -8,10 +10,19 @@ pub struct Enemy {
     pub is_alive: bool,
     pub size: f32,
     pub speed: f32,
+    pub health: f32,
     pub score: f32,
 }
 impl Enemy {
-    pub fn new(x: f32, y: f32, color: Color, size: f32, speed: f32, score: f32) -> Enemy {
+    pub fn new(
+        x: f32,
+        y: f32,
+        color: Color,
+        size: f32,
+        speed: f32,
+        health: f32,
+        score: f32,
+    ) -> Enemy {
         Enemy {
             x,
             y,
@@ -19,12 +30,16 @@ impl Enemy {
             is_alive: true,
             size,
             speed,
+            health,
             score,
         }
     }
 
-    pub fn kill(&mut self) {
-        self.is_alive = false;
+    pub fn kill(&mut self, bullet: Bullet) {
+        self.health -= bullet.damage;
+        if self.health <= 0.0 {
+            self.is_alive = false;
+        }
     }
 
     pub fn draw(&mut self, texture: &Texture2D) {
@@ -38,5 +53,20 @@ impl Enemy {
                 ..Default::default()
             },
         );
+    }
+
+    pub fn moving(&mut self, window_width: f32) {
+        let enemy = self;
+        enemy.x += enemy.speed;
+        if enemy.x > window_width - enemy.size {
+            enemy.x = window_width - enemy.size;
+            enemy.y += enemy.size;
+            enemy.speed *= -1.0;
+        }
+        if enemy.x < 0.0 {
+            enemy.x = 0.0;
+            enemy.y += enemy.size;
+            enemy.speed *= -1.0;
+        }
     }
 }

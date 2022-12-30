@@ -6,10 +6,11 @@ pub fn bg_render(txt2d: &Texture2D) {
     draw_texture(*txt2d, 0.0, 0.0, WHITE)
 }
 
-pub fn score_on_play_render(score: f32) {
-    draw_text(&format!("Score: {}", score), 10.0, 30.0, 24.0, WHITE);
+pub fn gample_overlay_render(game: &mut GameObject) {
+    draw_text(&format!("Score: {}", game.score), 10.0, 30.0, 24.0, WHITE);
+    draw_text(&format!("Waves: {}", game.waves), 10.0, 60.0, 24.0, WHITE);
 }
-pub fn render_start_screen() {
+pub fn start_screen_render() {
     draw_text(
         "Press Space to Start",
         (WINDOW_WIDTH / 2.0) - 200.0,
@@ -26,7 +27,7 @@ pub fn render_start_screen() {
     );
 }
 
-pub fn render_game_over_screen(game: &mut GameObject) {
+pub fn game_over_screen_render(game: &mut GameObject) {
     draw_text(
         "Game Over",
         (WINDOW_WIDTH / 2.0) - 100.0,
@@ -34,14 +35,14 @@ pub fn render_game_over_screen(game: &mut GameObject) {
         50.0,
         WHITE,
     );
-    draw_text("Score: ", (WINDOW_WIDTH / 2.0) - 100.0, 300.0, 24.0, WHITE);
     draw_text(
-        game.score.to_string().as_str(),
-        (WINDOW_WIDTH / 2.0) - 20.0,
+        &format!("Score: {}", game.score),
+        (WINDOW_WIDTH / 2.0) - 100.0,
         300.0,
         24.0,
         GREEN,
     );
+
     draw_text(
         "Press Space to Restart",
         (WINDOW_WIDTH / 2.0) - 100.0,
@@ -82,5 +83,5 @@ pub fn game_render(game: &mut GameObject) {
         }
     }
 
-    score_on_play_render(game.score);
+    gample_overlay_render(game);
 }
